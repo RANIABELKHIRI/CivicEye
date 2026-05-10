@@ -1,0 +1,169 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+    <title>CivicEye - الخريطة الحرارية للبلاغات</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: #020030;
+             font-family: system-ui, 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            background-color: rgb(0, 27, 50);
+            padding: 10px 20px;
+            height: 60px;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .logo1 {
+            direction: ltr;
+            width: 140px;
+        }
+
+        .profileImage {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;    
+            border: 2px solid #38bdf8;
+            object-fit: cover;      
+            cursor: pointer;
+        }
+
+        .wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .part-1 {
+            background-color: rgb(2, 39, 71);
+            width: 220px;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .part-1 a {
+            display: block;
+            padding: 20px;
+            color: #cbd5f5;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        .part-1 a:hover {
+            background: #334155; 
+        }
+
+        .map-content {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img id="profileImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="صورة المستخدم" class="profileImage">
+    <img src="{% static 'accounts/images/Frame_1.svg' %}" alt="CivicEye" class="logo1">
+</div>
+
+<div class="wrapper">
+    <div class="part-1">
+        <a href="{% url 'admin-dashboard' %}">لوحة المتابعة</a>
+        <a href="{% url 'authorities' %}">الجهات المعنية</a> 
+        <a href="{% url 'heatmap-page' %}">الخريطة</a> 
+    </div>  
+
+    <div class="map-content">
+        <div id="map"></div>
+    </div>
+</div>
+
+<script>
+    let map;
+    const STORAGE_KEY = "civiceye_reports";
+
+    function initMap() {
+        map = L.map('map').setView([34.6728, 3.2630], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        renderHeatmap();
+
+        setTimeout(() => { map.invalidateSize(); }, 400);
+    }
+
+    async function renderHeatmap() {
+
+      try {
+
+          const response = await fetch('/api/heatmap/');
+
+          const reports = await response.json();
+
+          const heatData = reports.map(report => {
+              return [
+                 report.latitude,
+                 report.longitude,
+                 0.25
+               ];
+          });
+
+          if (heatData.length > 0) {
+
+            L.heatLayer(heatData, {
+                 radius: 25,
+                 blur: 15,
+                 maxZoom: 1,
+                 max: 1.0,
+                 gradient: {
+                     0.25: 'blue',
+                     0.5: 'lime',
+                     0.75: 'yellow',
+                     1.0: 'red'
+                 }
+             }).addTo(map);
+           }
+
+        } catch(error) {
+
+            console.error("Error loading heatmap:", error);
+
+        }
+    }
+
+    window.onload = initMap;
+</script>
+
+</body>
+</html>

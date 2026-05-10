@@ -1,0 +1,620 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>CivicEye | لوحة الجهات المعنية</title>
+    <style>
+       body{
+        margin: 0;
+        background-color: #020030;
+       }
+        .container {
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+        background-color: rgb(0, 27, 50);
+        padding: 10px;
+        
+       }
+       .logo1{
+        direction:ltr;
+        width: 140px;
+       }
+       .profileImage{
+        direction:ltr;
+        margin-right: 100px;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;    
+        border: 2px solid #38bdf8;
+        object-fit: cover;      
+        cursor: pointer;
+       }
+       .profileImage:hover {
+            transform: scale(1.02);
+            border-color: #98dfff;
+        }
+        .wrapper {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .part-1 {
+            background-color: rgb(2, 39, 71);
+            width: 220px;
+            min-height:100vh;
+            left: 0; 
+            top: 60px;
+        }
+        .part-1 a {
+            display: block;
+            padding: 20px;
+            color: #cbd5f5;
+            text-decoration: none;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+        .part-1 a:hover {
+            background: #334155; 
+            width: 180px;   
+        }
+        .part-2 {
+            width: 800px;
+            background-color: rgb(2, 39, 71);
+            color: #ffffff;
+            font-size: 30px;
+            margin: 40px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            flex-direction: column;
+        }
+        .part-2 .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .toggle-btn {
+            background: linear-gradient(95deg, #0ea5e9, #0284c7);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 8px 20px;
+            min-width: 100px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .toggle-btn:hover {
+            background: linear-gradient(95deg, #38bdf8, #0ea5e9);
+            transform: scale(0.96);
+            box-shadow: 0 4px 12px rgba(14,165,233,0.4);
+        }
+        .hidden{
+            display: none;
+        }
+        .reports {
+            width: 100%;
+            margin-top: 15px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .report-item {
+            background-color: #f0f4f8;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            color: #1e293b;
+            font-size: 14px;
+            border-right: 4px solid #0ea5e9;
+            transition: all 0.2s;
+        }
+        .report-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .report-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .report-time {
+            font-size: 12px;
+            color: #64748b;
+            direction: ltr;
+            text-align: left;
+        }
+        .report-desc {
+            font-size: 14px;
+            color: #475569;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8fafc;
+            border-radius: 6px;
+            line-height: 1.6;
+        }
+        .report-images {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        .report-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid #e2e8f0;
+        }
+        .report-image:hover {
+            transform: scale(1.05);
+            border-color: #0ea5e9;
+        }
+        .report-location {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #e0f2fe;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #0369a1;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        .report-location:hover {
+            background-color: #0ea5e9;
+            color: white;
+            transform: translateX(-5px);
+        }
+        .report-user {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .empty-reports {
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        /* تنسيق الحالة - للقراءة فقط (بدون قائمة منسدلة) */
+        .user-status-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+        .status-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2ff;
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.green {
+            background-color: #22c55e;
+            box-shadow: 0 0 0 2px #bbf7d0;
+        }
+        .status-dot.blue {
+            background-color: #3b82f6;
+            box-shadow: 0 0 0 2px #bfdbfe;
+        }
+        .status-dot.yellow {
+            background-color: #eab308;
+            box-shadow: 0 0 0 2px #fef9c3;
+        }
+        .status-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        /* مودال عرض الصور بشكل كبير */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            cursor: pointer;
+        }
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            left: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        @keyframes zoom {
+            from {transform: scale(0.1)}
+            to {transform: scale(1)}
+        }
+        /* تنسيق رقم البلاغ */
+        .report-number {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* تنسيق شريط التمرير */
+        .reports::-webkit-scrollbar {
+            width: 8px;
+        }
+        .reports::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .reports::-webkit-scrollbar-thumb {
+            background: #0ea5e9;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <img id="profileImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
+     viewBox='0 0 24 24' fill='%2338bdf8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4
+     1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" 
+     alt="صورة المستخدم" class="profileImage">
+    <img src="{% static 'accounts/images/Frame_1.svg' %}" alt="CivicEye" class="logo1">
+  </div>
+  
+  <!-- مودال عرض الصور -->
+  <div id="imageModal" class="modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImage">
+  </div>
+  
+  <div class="wrapper">
+     <div class="part-1">
+       <a href="{% url 'authorities' %}">الجهات المعنية</a>
+        <a href="{% url 'admin-dashboard' %}">لوحة المتابعة</a>
+        <a href="{% url 'heatmap-page' %}">الخريطة</a> 
+     </div> 
+     <div id="authorities-container"></div>
+  </div>
+  
+  <script>
+// تعريف الجهات الثابتة
+let authorities = [
+    { id: 1, name: "مصلحة الطرقات بالبلدية", type: "road", reports: [] },
+    { id: 2, name: "مصلحة الكهرباء التابعة للبلدية", type: "light", reports: [] },
+    { id: 3, name: "مصلحة النظافة و البيئة بالبلدية", type: "trash", reports: [] }
+];
+
+const STORAGE_KEY = "civiceye_reports";
+
+// مفاتيح تخزين الحالات لكل جهة
+const STATUS_KEYS = {
+    road: "roads_reports_status",
+    light: "electricity_reports_status",
+    trash: "hygiene_reports_status"
+};
+
+// دالة لتنسيق التاريخ والوقت
+function formatDateTime(timestamp) {
+    if (!timestamp) return "غير محدد";
+    const date = new Date(timestamp);
+    return date.toLocaleString('ar-EG', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
+// تحميل حالة البلاغات لجهة معينة
+function loadStatusMapForAuthority(authorityType) {
+    const key = STATUS_KEYS[authorityType];
+    if (!key) return {};
+    try {
+        const stored = localStorage.getItem(key);
+        if (stored) return JSON.parse(stored);
+    } catch(e) {}
+    return {};
+}
+
+// دالة لجلب البلاغات من localStorage وتوزيعها
+function fetchAndDistributeReports() {
+    let allReports = [];
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            allReports = JSON.parse(stored);
+        }
+    } catch(e) { console.warn(e); }
+    
+    authorities.forEach(auth => { auth.reports = []; });
+    
+    allReports.forEach(report => {
+        if (!report || !report.problemType) return;
+        
+        let targetAuthority = null;
+        if (report.problemType === "road") targetAuthority = authorities.find(a => a.type === "road");
+        else if (report.problemType === "light") targetAuthority = authorities.find(a => a.type === "light");
+        else if (report.problemType === "trash") targetAuthority = authorities.find(a => a.type === "trash");
+        
+        if (targetAuthority) {
+            const reportId = report.reportId || `rep_${report.timestamp}_${Math.random()}`;
+            
+            // تحميل الحالة المخزنة مسبقاً
+            const statusMap = loadStatusMapForAuthority(targetAuthority.type);
+            const savedStatus = statusMap[reportId] || report.status;
+            
+            const reportForDisplay = {
+                id: reportId,
+                title: report.problemTypeName || (report.problemType === "road" ? "🚧 مشكلة في الطريق" : (report.problemType === "light" ? "💡 عطل في الإنارة" : "🗑️ مشكلة نفايات")),
+                description: report.description || "لا يوجد وصف تفصيلي",
+                timestamp: report.timestamp,
+                formattedDate: formatDateTime(report.timestamp),
+                status: savedStatus || "قيد الدراسة",
+                location: { lat: report.latitude, lng: report.longitude },
+                images: report.imagesBase64 || [],
+                userIdentifier: report.userIdentifier,
+                userName: report.userName,
+                address: report.address || null
+            };
+            targetAuthority.reports.push(reportForDisplay);
+        }
+    });
+    
+    authorities.forEach(auth => {
+        // ترتيب تنازلي من الأحدث إلى الأقدم
+        auth.reports.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    });
+}
+
+// دالة للحصول على النقطة الملونة والنص حسب الحالة
+function getStatusDotAndText(statusValue) {
+    switch (statusValue) {
+        case 'تم الحل':
+            return { dotClass: 'green', text: 'تم الحل' };
+        case 'قيد المعالجة':
+            return { dotClass: 'blue', text: 'قيد المعالجة' };
+        case 'قيد الدراسة':
+        default:
+            return { dotClass: 'yellow', text: 'قيد الدراسة' };
+    }
+}
+
+// دالة لعرض الصور في مودال
+function showImageModal(imageSrc) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    modal.style.display = "block";
+    modalImg.src = imageSrc;
+}
+
+// دالة عرض لوحة التحكم - عرض الحالة فقط
+function renderDashboard() {
+    const container = document.getElementById('authorities-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    authorities.forEach(authority => {
+        const sortedReports = [...authority.reports].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        const part2Div = document.createElement('div');
+        part2Div.className = 'part-2';
+        
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'header';
+        headerDiv.innerHTML = `
+            <span> ${escapeHtml(authority.name)}</span>
+            <button class="toggle-btn" data-auth-id="${authority.id}"> عرض البلاغات</button>
+        `;
+        
+        const reportsDiv = document.createElement('div');
+        reportsDiv.className = 'reports hidden';
+        
+        if (sortedReports.length > 0) {
+            sortedReports.forEach((report, index) => {
+                const reportDiv = document.createElement('div');
+                reportDiv.className = 'report-item';
+                
+                const reportNumber = index + 1;
+                const googleMapsUrl = `https://www.google.com/maps?q=${report.location.lat},${report.location.lng}`;
+                
+                // معرض الصور
+                let imagesHtml = '';
+                if (report.images && report.images.length > 0) {
+                    imagesHtml = '<div class="report-images">';
+                    report.images.forEach((imgBase64, idx) => {
+                        imagesHtml += `<img src="${imgBase64}" class="report-image" data-image-index="${idx}" data-report-id="${report.id}" alt="صورة البلاغ">`;
+                    });
+                    imagesHtml += '</div>';
+                }
+                
+                // معلومات الحالة
+                const statusInfo = getStatusDotAndText(report.status);
+                
+                const statusHtml = `
+                    <div class="user-status-wrapper">
+                        <div class="report-user">
+                            👤 المرسل: ${escapeHtml(report.userName || 'زائر')}
+                        </div>
+                        <div class="status-container">
+                            <span class="status-dot ${statusInfo.dotClass}"></span>
+                            <span class="status-text">${statusInfo.text}</span>
+                        </div>
+                    </div>
+                `;
+                
+                reportDiv.innerHTML = `
+                    <div class="report-header">
+                        <div class="report-title">
+                            <span class="report-number">بلاغ رقم ${reportNumber}</span>
+                        </div>
+                        <div class="report-time">
+                            🕒 ${escapeHtml(report.formattedDate)}
+                        </div>
+                    </div>
+                    
+                    <div class="report-desc">
+                        📝 <strong>وصف المشكلة:</strong><br>
+                        ${escapeHtml(report.description)}
+                    </div>
+                    
+                    ${imagesHtml}
+                    
+                    <div style="display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                        <a href="${googleMapsUrl}" target="_blank" class="report-location">
+                            📍 <strong>عرض الموقع على خرائط جوجل</strong> 
+                        </a>
+                    </div>
+                    
+                    ${statusHtml}
+                `;
+                
+                reportsDiv.appendChild(reportDiv);
+                
+                // إضافة حدث النقر على الصور
+                const images = reportDiv.querySelectorAll('.report-image');
+                images.forEach(img => {
+                    img.addEventListener('click', () => {
+                        showImageModal(img.src);
+                    });
+                });
+            });
+        } else {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'empty-reports';
+            emptyDiv.innerHTML = '📭 لا توجد بلاغات حالياً';
+            reportsDiv.appendChild(emptyDiv);
+        }
+        
+        part2Div.appendChild(headerDiv);
+        part2Div.appendChild(reportsDiv);
+        container.appendChild(part2Div);
+        
+        const toggleBtn = headerDiv.querySelector('.toggle-btn');
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isHidden = reportsDiv.classList.contains("hidden");
+            if(isHidden) {
+                reportsDiv.classList.remove("hidden");
+                toggleBtn.innerHTML = " إخفاء البلاغات";
+            } else {
+                reportsDiv.classList.add("hidden");
+                toggleBtn.innerHTML = " عرض البلاغات";
+            }
+        });
+    });
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+        if(m === '&') return '&amp;';
+        if(m === '<') return '&lt;';
+        if(m === '>') return '&gt;';
+        return m;
+    });
+}
+
+function refreshAllData() {
+    fetchAndDistributeReports();
+    renderDashboard();
+}
+
+// إغلاق المودال عند النقر على الـ X أو خارج الصورة
+const modal = document.getElementById('imageModal');
+const closeModal = document.querySelector('.close-modal');
+if (closeModal) {
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+}
+if (modal) {
+    modal.onclick = function(e) {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+}
+
+// الاستماع لتغيرات localStorage للتحديث عند تغيير الحالة من الصفحات الأخرى
+window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEY || 
+        event.key === STATUS_KEYS.road || 
+        event.key === STATUS_KEYS.light || 
+        event.key === STATUS_KEYS.trash) {
+        refreshAllData();
+    }
+});
+
+// تحميل البيانات الأولية
+refreshAllData();
+
+</script>
+</body>
+</html>

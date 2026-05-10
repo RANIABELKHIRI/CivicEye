@@ -1,0 +1,693 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>CivicEye | مصلحة الكهرباء - التبليغات</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #020030;
+            font-family: system-ui, 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgb(0, 27, 50);
+            padding: 10px;
+        }
+
+        .logo1 {
+            direction: ltr;
+            width: 140px;
+        }
+
+        .profileImage {
+            direction: ltr;
+            margin-right: 100px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 2px solid #38bdf8;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .profileImage:hover {
+            transform: scale(1.02);
+            border-color: #98dfff;
+        }
+
+        .wrapper {
+            display: flex;
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .part-1 {
+            background-color: rgb(2, 39, 71);
+            width: 220px;
+            min-height: 100vh;
+            left: 0;
+            top: 60px;
+        }
+
+        .part-1 a {
+            display: block;
+            padding: 20px;
+            color: #cbd5f5;
+            text-decoration: none;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .part-1 a:hover {
+            background: #334155;
+            width: 180px;
+        }
+
+        /* القسم الرئيسي لعرض التبليغات */
+        .notifications-section {
+            flex: 1;
+            background-color: rgb(2, 39, 71);
+            border-radius: 4px;
+            padding: 24px;
+            margin: 10px;
+            margin: 20px 40px 20px 40px;
+        }
+
+        .section-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            border-right: 5px solid #0ea5e9;
+            padding-right: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+            padding-left: 8px;
+        }
+
+        /* إخفاء شريط التمرير */
+        .reports-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .reports-list {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* تنسيق بطاقة البلاغ */
+        .report-item {
+            background-color: #f0f4f8;
+            padding: 20px;
+            border-radius: 20px;
+            color: #1e293b;
+            font-size: 14px;
+            border-right: 5px solid #0ea5e9;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-item:hover {
+            transform: translateX(-6px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+            background-color: #ffffff;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .report-title {
+            font-weight: bold;
+            font-size: 18px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .report-number {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 40px;
+            padding: 5px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-time {
+            font-size: 12px;
+            color: #64748b;
+            direction: ltr;
+            text-align: left;
+            background: #eef2ff;
+            padding: 4px 12px;
+            border-radius: 30px;
+        }
+
+        .report-desc {
+            font-size: 14px;
+            color: #334155;
+            margin: 14px 0;
+            padding: 12px;
+            background-color: #f8fafc;
+            border-radius: 16px;
+            line-height: 1.65;
+            border: 1px solid #e2e8f0;
+        }
+
+        .report-images {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .report-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid #cbd5e1;
+            background: #f1f5f9;
+        }
+
+        .report-image:hover {
+            transform: scale(1.05);
+            border-color: #0ea5e9;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .report-location {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #e0f2fe;
+            padding: 8px 16px;
+            border-radius: 40px;
+            text-decoration: none;
+            color: #0369a1;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 8px;
+        }
+
+        .report-location:hover {
+            background-color: #0ea5e9;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        /* تنسيق اسم المستخدم + الحالة بجانب بعض */
+        .user-status-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .report-user {
+            font-size: 12px;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #eef2ff;
+            width: fit-content;
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        /* حاوية الحالة مع النقطة الملونة */
+        .status-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2ff;
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.green {
+            background-color: #22c55e;
+            box-shadow: 0 0 0 2px #bbf7d0;
+        }
+
+        .status-dot.blue {
+            background-color: #3b82f6;
+            box-shadow: 0 0 0 2px #bfdbfe;
+        }
+
+        .status-dot.yellow {
+            background-color: #eab308;
+            box-shadow: 0 0 0 2px #fef9c3;
+        }
+
+        .status-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        /* قائمة منسدلة صغيرة بجانب الحالة (للتحكم) */
+        .status-select {
+            background: white;
+            border: 1px solid #94a3b8;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #0f172a;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .status-select:hover {
+            border-color: #0ea5e9;
+            background-color: #f8fafc;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+        }
+
+        .empty-reports {
+            text-align: center;
+            color: #cbd5e6;
+            background: #0a2a44;
+            padding: 48px 20px;
+            font-size: 18px;
+            border-radius: 28px;
+            font-weight: 500;
+        }
+
+        /* مودال الصور */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.94);
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 20px;
+            border: 3px solid #38bdf8;
+            box-shadow: 0 0 30px rgba(14, 165, 233, 0.4);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 25px;
+            left: 45px;
+            color: #f1f1f1;
+            font-size: 44px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            background: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal:hover {
+            background: #ef4444;
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 900px) {
+            .wrapper {
+                flex-direction: column;
+            }
+            .part-1 {
+                width: 100%;
+                min-height: auto;
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
+            .part-1 a {
+                width: auto;
+                display: inline-block;
+                padding: 12px;
+            }
+            .notifications-section {
+                margin: 0 0 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <img id="profileImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
+     viewBox='0 0 24 24' fill='%2338bdf8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4
+     1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
+         alt="صورة المستخدم" class="profileImage">
+    <img src="{% static 'accounts/images/Frame_1.svg' %}" alt="CivicEye" class="logo1" onerror="this.src='https://placehold.co/140x40?text=CivicEye'">
+</div>
+
+<!-- مودال عرض الصور -->
+<div id="imageModal" class="modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImage">
+</div>
+
+<div class="wrapper">
+    <div class="part-1">
+        <a href="#">لوحة المتابعة</a>
+    </div>
+
+    <div class="notifications-section">
+        <div class="section-title">
+            تبليغات مصلحة الكهرباء
+        </div>
+        <div id="electricityReportsContainer" class="reports-list">
+            <div class="empty-reports">⏳ جاري تحميل التبليغات...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY = "civiceye_reports";
+    const REPORTS_STATUS_KEY = "electricity_reports_status";
+    const ELECTRICITY_AUTHORITY_TYPE = "lighting";
+
+    function formatDateTime(timestamp) {
+        if (!timestamp) return "غير محدد";
+        const date = new Date(timestamp);
+        return date.toLocaleString('ar-EG', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+    }
+
+    function loadStatusMap() {
+        try {
+            const stored = localStorage.getItem(REPORTS_STATUS_KEY);
+            if (stored) return JSON.parse(stored);
+        } catch (e) {}
+        return {};
+    }
+
+    function saveReportStatus(reportId, status) {
+        const statusMap = loadStatusMap();
+        statusMap[reportId] = status;
+        localStorage.setItem(REPORTS_STATUS_KEY, JSON.stringify(statusMap));
+        window.dispatchEvent(new Event('reportStatusChanged'));
+    }
+
+    function fetchElectricityReports() {
+        let allReports = [];
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) allReports = JSON.parse(stored);
+            else return [];
+        } catch (e) {
+            return [];
+        }
+
+        const electricityReports = allReports.filter(report => report && report.problemType === "lighting");
+        const statusMap = loadStatusMap();
+
+        const formattedReports = electricityReports.map(report => {
+            const reportId = report.reportId || `rep_${report.timestamp || Date.now()}_${Math.random()}`;
+            return {
+                id: reportId,
+                title: report.problemTypeName || "عطل في الكهرباء أو الإنارة",
+                description: report.description || "لا يوجد وصف تفصيلي",
+                timestamp: report.timestamp || Date.now(),
+                formattedDate: formatDateTime(report.timestamp),
+                status: statusMap[reportId] || report.status || "قيد الدراسة",
+                location: {lat: report.latitude, lng: report.longitude},
+                images: report.imagesBase64 || [],
+                userName: report.userName || "زائر",
+                problemType: report.problemType
+            };
+        });
+
+        formattedReports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        return formattedReports;
+    }
+
+    function showImageModal(imageSrc) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        if (modal && modalImg) {
+            modal.style.display = "block";
+            modalImg.src = imageSrc;
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function getStatusDotAndText(statusValue) {
+        switch (statusValue) {
+            case 'تم الحل':
+                return { dotClass: 'green', text: 'تم الحل' };
+            case 'قيد المعالجة':
+                return { dotClass: 'blue', text: 'قيد المعالجة' };
+            case 'قيد الدراسة':
+            default:
+                return { dotClass: 'yellow', text: 'قيد الدراسة' };
+        }
+    }
+
+    function renderElectricityNotifications() {
+        const container = document.getElementById('electricityReportsContainer');
+        if (!container) return;
+
+        const reports = fetchElectricityReports();
+
+        if (!reports || reports.length === 0) {
+            container.innerHTML = `
+                <div class="empty-reports">
+                    لا توجد تبليغات خاصة بالكهرباء حالياً<br>
+                    <span style="font-size: 13px;">سيتم عرض البلاغات عند إرسالها من المواطنين</span>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+
+        reports.forEach((report, index) => {
+            const reportNumber = index + 1;
+            
+            let mapsLink = '#';
+            let locationValid = false;
+            if (report.location && report.location.lat && report.location.lng) {
+                mapsLink = `https://www.google.com/maps?q=${report.location.lat},${report.location.lng}`;
+                locationValid = true;
+            }
+
+            let imagesHtml = '';
+            if (report.images && Array.isArray(report.images) && report.images.length > 0) {
+                imagesHtml = '<div class="report-images">';
+                report.images.forEach((imgBase64) => {
+                    if (imgBase64 && (imgBase64.startsWith('data:image') || imgBase64.startsWith('http'))) {
+                        imagesHtml += `<img src="${imgBase64}" class="report-image" alt="صورة البلاغ">`;
+                    } else if (imgBase64 && typeof imgBase64 === 'string') {
+                        imagesHtml += `<img src="${imgBase64}" class="report-image" alt="صورة البلاغ" onerror="this.style.display='none'">`;
+                    }
+                });
+                imagesHtml += '</div>';
+            }
+
+            const currentStatus = report.status;
+            const statusInfo = getStatusDotAndText(currentStatus);
+
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'report-item';
+            reportDiv.setAttribute('data-report-id', report.id);
+
+            // بناء user + status بجانب بعض
+            const userAndStatusHtml = `
+                <div class="user-status-wrapper">
+                    <div class="report-user">
+                        👤 المرسل: ${escapeHtml(report.userName)}
+                    </div>
+                    <div class="status-container">
+                        <span class="status-dot ${statusInfo.dotClass}"></span>
+                        <span class="status-text">${statusInfo.text}</span>
+                        <select class="status-select" data-report-id="${report.id}">
+                            <option value="قيد الدراسة" ${currentStatus === 'قيد الدراسة' ? 'selected' : ''}>قيد الدراسة</option>
+                            <option value="قيد المعالجة" ${currentStatus === 'قيد المعالجة' ? 'selected' : ''}>قيد المعالجة</option>
+                            <option value="تم الحل" ${currentStatus === 'تم الحل' ? 'selected' : ''}>تم الحل</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+
+            reportDiv.innerHTML = `
+                <div class="report-header">
+                    <div class="report-title">
+                        <span class="report-number">بلاغ رقم ${reportNumber}</span>
+                       
+                    </div>
+                    <div class="report-time">
+                        🕒 ${escapeHtml(report.formattedDate)}
+                    </div>
+                </div>
+                <div class="report-desc">
+                    📝 <strong>وصف المشكلة:</strong><br>
+                    ${escapeHtml(report.description)}
+                </div>
+                ${imagesHtml}
+                <div style="display: flex; justify-content: flex-start; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 12px;">
+                    ${locationValid ? `<a href="${mapsLink}" target="_blank" class="report-location">📍 عرض الموقع على خرائط جوجل</a>` : '<span class="report-location" style="background:#e2e8f0; cursor:default;">📍 الموقع غير متوفر</span>'}
+                </div>
+                ${userAndStatusHtml}
+            `;
+
+            container.appendChild(reportDiv);
+
+            // أحداث الصور
+            const imagesInCard = reportDiv.querySelectorAll('.report-image');
+            imagesInCard.forEach(img => {
+                img.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (img.src) showImageModal(img.src);
+                });
+            });
+
+            // تغيير الحالة من القائمة المنسدلة
+            const statusSelect = reportDiv.querySelector('.status-select');
+            if (statusSelect) {
+                statusSelect.addEventListener('change', (event) => {
+                    event.stopPropagation();
+                    const newStatus = statusSelect.value;
+                    const reportId = statusSelect.getAttribute('data-report-id');
+                    if (reportId) {
+                        saveReportStatus(reportId, newStatus);
+                        // تحديث النقطة والنص ديناميكياً
+                        const newStatusInfo = getStatusDotAndText(newStatus);
+                        const dotSpan = reportDiv.querySelector('.status-dot');
+                        const textSpan = reportDiv.querySelector('.status-text');
+                        if (dotSpan) {
+                            dotSpan.className = `status-dot ${newStatusInfo.dotClass}`;
+                        }
+                        if (textSpan) {
+                            textSpan.textContent = newStatusInfo.text;
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    function setupModal() {
+        const modal = document.getElementById('imageModal');
+        const closeBtn = document.querySelector('.close-modal');
+        if (closeBtn) {
+            closeBtn.onclick = () => modal.style.display = "none";
+        }
+        if (modal) {
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.style.display = "none";
+            };
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal && modal.style.display === 'block') {
+                modal.style.display = 'none';
+            }
+        });
+    }
+
+    let refreshInterval = null;
+    function startAutoRefresh() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(() => renderElectricityNotifications(), 4000);
+    }
+
+    function listenToStorageChanges() {
+        window.addEventListener('storage', (event) => {
+            if (event.key === STORAGE_KEY || event.key === REPORTS_STATUS_KEY) {
+                renderElectricityNotifications();
+            }
+        });
+        window.addEventListener('reportStatusChanged', () => renderElectricityNotifications());
+    }
+
+    function init() {
+        setupModal();
+        renderElectricityNotifications();
+        startAutoRefresh();
+        listenToStorageChanges();
+    }
+
+    init();
+
+    window.addEventListener('beforeunload', () => {
+        if (refreshInterval) clearInterval(refreshInterval);
+    });
+</script>
+</body>
+</html>

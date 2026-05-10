@@ -1,0 +1,220 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(180deg, #f5f5f5 0%, #bebebe 50%, #7e7d7d 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .summary-card {
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .summary-card .count { font-size: 24px; font-weight: bold; margin-top: 10px; color: #000000; }
+
+        .records-container {
+            background-color: #eeeeee;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .records-title { text-align: center; font-weight: bold; font-size: 20px; margin-bottom: 10px; }
+        
+        .report-card {
+            background-color: #d9d9d9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .report-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .report-date { font-size: 11px; color: #666; }
+        .report-id { font-weight: bold; font-size: 14px; color: #2c3e50; }
+
+        .report-desc { font-size: 13px; margin: 10px 0; line-height: 1.5; text-align: right; }
+        
+        .status-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef2ff;
+            padding: 4px 14px;
+            border-radius: 30px;
+            align-self: flex-start;
+            margin-top: 5px;
+        }
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .status-dot.green { background-color: #22c55e; box-shadow: 0 0 0 2px #bbf7d0; }
+        .status-dot.blue { background-color: #3b82f6; box-shadow: 0 0 0 2px #bfdbfe; }
+        .status-dot.yellow { background-color: #eab308; box-shadow: 0 0 0 2px #fef9c3; }
+        .status-dot.red { background-color: #ef4444; box-shadow: 0 0 0 2px #fecaca; }
+
+        .status-text { font-size: 12px; font-weight: 600; color: #1e293b; }
+
+        .no-data { text-align: center; padding: 30px; color: #7f8c8d; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <img src="{% static 'complaints/images/Frame 3.svg' %}" alt="CivicEye" class="logo">
+    <a href="{% url 'citizen-home' %}" class="page-link">الصفحة الرئيسية</a>
+    <div class="page-link page-separator">/</div>
+    <a href="track.html" class="page-link page-current">تتبع البلاغات</a>
+
+    <div class="container">
+        <div class="summary-card">
+            <h3>إجمالي بلاغاتك المسجلة</h3>
+            <div id="totalReportsCount" class="count">0</div>
+        </div>
+
+        <div class="records-container">
+            <div class="records-title">سجل البلاغات الأخيرة</div>
+            <div id="reportsList">
+                <div class="no-data">جاري تحميل البيانات...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       
+        const STATUS_KEYS = {
+            road: "roads_reports_status",
+            light: "electricity_reports_status",
+            trash: "hygiene_reports_status"
+        };
+
+        function getStatusDetails(statusValue) {
+            switch (statusValue) {
+                case 'تم الحل':
+                    return { dotClass: 'green', text: 'تم الحل' };
+                case 'قيد المعالجة':
+                    return { dotClass: 'blue', text: 'قيد المعالجة' };
+                case 'مرفوض':
+                    return { dotClass: 'red', text: 'مرفوض' };
+                default:
+                    return { dotClass: 'yellow', text: 'قيد الدراسة' };
+            }
+        }
+
+        async function loadUserReports() {
+            const reportsListContainer = document.getElementById('reportsList');
+            const totalCountElement = document.getElementById('totalReportsCount');
+            
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                reportsListContainer.innerHTML = '<div class="no-data">الرجاء تسجيل الدخول أولاً</div>';
+                return;
+            }
+
+            try {  
+                  console.log(localStorage.getItem("access"));                   
+                  const token = localStorage.getItem("access");
+                  const response = await fetch('/api/complaints/my/', {
+                       method: 'GET',
+                       headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                  const userReports = await response.json();
+                   
+                  console.log(userReports);
+
+                  totalCountElement.textContent = userReports.length;
+
+                  if (userReports.length === 0) {
+                      reportsListContainer.innerHTML = '<div class="no-data">لم تقم بإرسال أي بلاغات بعد.</div>';
+                      return;
+                    }
+
+                  reportsListContainer.innerHTML = '';
+
+                  userReports.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                  userReports.forEach((report, index) => {
+
+                    const date = new Date(report.created_at).toLocaleString('ar-EG');
+
+                    const statusInfo = getStatusDetails(report.status);
+
+                    const reportHTML = `
+                       <div class="report-card">
+                          <div class="report-header">
+                              <div class="report-id">بلاغ رقم ${index + 1}</div>
+                              <div class="report-date">${date}</div>
+                          </div>
+
+                          <div class="report-desc">
+                               <strong>نوع المشكلة:</strong> ${report.complaint_type}<br>
+                               <strong>الوصف:</strong> ${report.description}
+                           </div>
+
+                          <div class="status-container">
+                               <span class="status-dot ${statusInfo.dotClass}"></span>
+                               <span class="status-text">${statusInfo.text}</span>
+                          </div>
+                     </div>
+                   `;
+
+                   reportsListContainer.insertAdjacentHTML('beforeend', reportHTML);
+                });
+
+            } catch (error) {
+              console.error(error);
+              reportsListContainer.innerHTML = '<div class="no-data">خطأ في تحميل البيانات</div>';
+            }
+            
+            
+        }
+
+       //تخذيث المستمر
+        window.addEventListener('storage', (e) => {
+            if (Object.values(STATUS_KEYS).includes(e.key) || e.key === 'civiceye_reports') {
+                loadUserReports();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadUserReports);
+    </script>
+</body>
+</html>

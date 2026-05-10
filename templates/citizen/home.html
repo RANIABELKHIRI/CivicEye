@@ -1,0 +1,177 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>CivicEye - الرئيسية</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+          body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(0deg, #7e7d7d 0%, #bebebe 50%, #f5f5f5 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        .pie-chart { transition: background 0.5s ease; }
+    </style>
+</head>
+<body class="page-body">
+
+<div>
+    <img src="{% static 'complaints/images/Frame 3.svg' %}" alt="CivicEye" class="logo">
+    <a href="home.html" class="page-link">الصفحة الرئيسية</a>
+</div>
+
+<div>
+    <img src="{% static 'accounts/images/Frame .svg' %}" class="home-square" alt="الإطار">
+    <img id="profileImage" src="{% static 'accounts/images/user.png' %}" class="user" alt="صورة المستخدم">
+<div>
+    <div class="usename" style="top:25%;">الاسم الكامل</div>
+    <div id="userFullName" class="usename" style="top:28%;">تحميل...</div>
+
+    <div class="usename" style="top:32.5%;">البريد الإلكتروني / رقم الهاتف</div>
+    <div id="userIdentifier" class="usename" style="top:35%;">تحميل...</div>
+    
+    <div class="usename" style="top:38.5%;left:51%;"> نبذة عني</div>
+    <div id="userAbout" class="usename" style="top: 40.5%; left:53.75%;">لا توجد نبذة</div>
+  
+    <a href="/api/accounts/profile/edit/" class="btnedit">تعديل</a>
+    
+</div>
+
+    <div class="stats-container">
+        <div class="single-pie">
+            <div id="pieChart" class="pie-chart" style="background: conic-gradient(#2ecc71 0% 0%, #e0e0e0 0% 100%);">
+                <div class="pie-inner">
+                    <div id="processedCount" class="pie-number">0</div>
+                    <div id="totalCount" class="pie-total">من أصل 0</div>
+                </div>
+            </div>
+            <div class="pie-label">
+                <div>بلاغات تم حلها</div>
+                <div id="percentageText" class="pie-percentage">0%</div>
+            </div>
+            <div id="noReportsMsg" class="no-reports" style="display: none;">لم تقم بإرسال أي بلاغات بعد</div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <button class="btn" style="background-color: #f9753d;"onclick="location.href='{% url 'add-complaint-page' %}'">ارسال البلاغ</button>
+</div>
+
+<div>
+    <button class="btn" style="background-color: #3498db;" onclick="location.href='/complaints/track/'">تتبع البلاغ</button>
+</div>
+
+<script>
+    const STATUS_KEYS = {
+        road: "roads_reports_status",
+        light: "electricity_reports_status",
+        trash: "hygiene_reports_status"
+    };
+
+    function showUpdateToast(message) {
+        const existingToast = document.querySelector('.update-toast');
+        if (existingToast) existingToast.remove();
+        
+        const toast = document.createElement('div');
+        toast.className = 'update-toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            if (toast.parentNode) toast.remove();
+        }, 3000);
+    }
+
+    function updateReportStats(user) {
+        let totalReports = 0;
+        let solvedReportsCount = 0;
+        
+        const allReports = JSON.parse(localStorage.getItem('civiceye_reports') || '[]');
+        
+        const userReports = allReports.filter(report => report.userIdentifier === user.identifier);
+        totalReports = userReports.length;
+
+        userReports.forEach(report => {
+            let currentStatus = report.status || "قيد الدراسة";
+            
+            const statusKey = STATUS_KEYS[report.problemType];
+            if (statusKey) {
+                const statusMap = JSON.parse(localStorage.getItem(statusKey) || '{}');
+                if (statusMap[report.reportId]) {
+                    currentStatus = statusMap[report.reportId];
+                }
+            }
+
+            if (currentStatus === 'تم الحل') {
+                solvedReportsCount++;
+            }
+        });
+        
+        const percentage = totalReports > 0 ? Math.round((solvedReportsCount / totalReports) * 100) : 0;
+        
+        document.getElementById('processedCount').textContent = solvedReportsCount;
+        document.getElementById('totalCount').textContent = `من أصل ${totalReports}`;
+        document.getElementById('percentageText').textContent = `${percentage}%`;
+        
+        const pieChart = document.getElementById('pieChart');
+        if (totalReports > 0) {
+            const solvedPercentage = (solvedReportsCount / totalReports) * 100;
+            pieChart.style.background = `conic-gradient(#2ecc71 0% ${solvedPercentage}%, #e0e0e0 ${solvedPercentage}% 100%)`;
+            document.getElementById('noReportsMsg').style.display = 'none';
+        } else {
+            pieChart.style.background = `conic-gradient(#e0e0e0 0% 100%)`;
+            document.getElementById('noReportsMsg').style.display = 'block';
+        }
+    }
+    
+    function refreshPageData() {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        if (!currentUser) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        const fullName = `${currentUser.firstName || ''} ${currentUser.lastName || ''}`;
+        document.getElementById('userFullName').textContent = fullName.trim() || 'مستخدم';
+        document.getElementById('userIdentifier').textContent = currentUser.identifier;
+        
+        const aboutText = document.getElementById('userAbout');
+        aboutText.textContent = (currentUser.about && currentUser.about.trim() !== '') ? currentUser.about : 'لا توجد نبذة';
+        
+        if (currentUser.profileImage && currentUser.profileImage !== 'imags/user.png') {
+            document.getElementById('profileImage').src = currentUser.profileImage;
+        }
+        
+        updateReportStats(currentUser);
+    }
+    
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'civiceye_reports' || Object.values(STATUS_KEYS).includes(e.key)) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                updateReportStats(currentUser);
+                showUpdateToast('📊 تم تحديث حالة البلاغات');
+            }
+        }
+        
+        if (e.key === 'currentUser') {
+            refreshPageData();
+        }
+    });
+    
+    document.addEventListener('DOMContentLoaded', refreshPageData);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>CivicEye - انشاء حساب</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="creat-body">
+
+<div class="creatdiv">
+    <div  style="font-size: 23px; color: #ffffff; margin-right:120px;">انشاء حساب</div>
+    <div  style="font-size: 15px; color: rgba(255, 255, 255, 0.546);margin-right:120px;">الامر سهل و بسيط</div>
+    
+    <hr style="height:2px; width:100%; border: none; background-color: #fff;">
+    
+    <form id="signupForm">
+        <input type="text" class="input-field" placeholder="اسم العائلة" dir="rtl" name="lastName">
+        <input type="text" class="input-field" placeholder="الاسم الاول" dir="rtl" name="firstName">
+        
+        <h5>تاريخ الميلاد</h5>
+        <input type="date" class="input-field" name="birthDate">
+        
+        <input type="text" class="input-field" placeholder="رقم الهاتف او البريد الالكتروني" name="email" dir="rtl">
+        <input type="password" class="input-field" placeholder="كلمة السر" name="password">
+        
+        <p>قد تتلقى اشعارات عبر رسائل نصية قصيرة هنا لاثبات هويتك</p>
+        
+        <button type="submit" class="creat-btn-page">انشاء حساب</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const signupForm = document.getElementById('signupForm');
+        const lastName = document.querySelector('input[name="lastName"]');
+        const firstName = document.querySelector('input[name="firstName"]');
+        const birthDate = document.querySelector('input[name="birthDate"]');
+        const email = document.querySelector('input[name="email"]');
+        const password = document.querySelector('input[name="password"]');
+        const submitButton = document.querySelector('.creat-btn-page');
+
+        function showError(message) {
+            const oldError = document.querySelector('.error-message');
+            if (oldError) oldError.remove();
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.style.color = 'red';
+            errorDiv.style.backgroundColor = '#ffebee';
+            errorDiv.style.padding = '10px';
+            errorDiv.style.borderRadius = '5px';
+            errorDiv.style.marginTop = '10px';
+            errorDiv.style.textAlign = 'center';
+            errorDiv.textContent = message;
+            
+            const creat = document.querySelector('.creatdiv');
+            if (creat) {
+                creat.appendChild(errorDiv);
+            }
+        }
+        
+        function showSuccess(message) {
+            const oldSuccess = document.querySelector('.success-message');
+            if (oldSuccess) oldSuccess.remove();
+            
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.style.color = 'green';
+            successDiv.style.backgroundColor = '#e8f5e8';
+            successDiv.style.padding = '10px';
+            successDiv.style.borderRadius = '5px';
+            successDiv.style.marginTop = '10px';
+            successDiv.style.textAlign = 'center';
+            successDiv.textContent = message;
+            
+            const creat = document.querySelector('.creatdiv');
+            if (creat) {
+                creat.appendChild(successDiv);
+            }
+        }
+        
+        function setLoading(isLoading) {
+            if (!submitButton) return;
+            
+            if (isLoading) {
+                submitButton.disabled = true;
+                submitButton.style.opacity = '0.7';
+                submitButton.textContent = 'جاري إنشاء الحساب...';
+            } else {
+                submitButton.disabled = false;
+                submitButton.style.opacity = '1';
+                submitButton.textContent = 'انشاء حساب';
+            }
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function isValidPhone(phone) {
+            const phoneRegex = /^(05|06|07)[0-9]{8}$/;
+            return phoneRegex.test(phone);
+        }
+        
+        function isValidAge(birthDateValue) {
+            if (!birthDateValue) return false;
+            
+            const today = new Date();
+            const birth = new Date(birthDateValue);
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+            
+            return age >= 13;
+        }
+        
+        function isStrongPassword(password) {
+            const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
+            return passwordRegex.test(password);
+        }
+        
+        function isUserExists(identifier) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            return users.some(user => user.identifier === identifier);
+        }
+        
+        function saveUser(userData) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            users.push(userData);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+        }
+        
+        if (signupForm) {
+            signupForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                const oldError = document.querySelector('.error-message');
+                if (oldError) oldError.remove();
+                
+                const oldSuccess = document.querySelector('.success-message');
+                if (oldSuccess) oldSuccess.remove();
+                
+                const lastNameValue = lastName ? lastName.value.trim() : '';
+                const firstNameValue = firstName ? firstName.value.trim() : '';
+                const birthDateValue = birthDate ? birthDate.value : '';
+                const emailValue = email ? email.value.trim() : '';
+                const passwordValue = password ? password.value : '';
+                
+                if (!lastNameValue) {
+                    showError('الرجاء إدخال اسم العائلة');
+                    return;
+                }
+                
+                if (lastNameValue.length < 2) {
+                    showError('اسم العائلة يجب أن يكون حرفين على الأقل');
+                    return;
+                }
+                
+                if (!firstNameValue) {
+                    showError('الرجاء إدخال الاسم الأول');
+                    return;
+                }
+                
+                if (firstNameValue.length < 2) {
+                    showError('الاسم الأول يجب أن يكون حرفين على الأقل');
+                    return;
+                }
+                
+                if (!birthDateValue) {
+                    showError('الرجاء إدخال تاريخ الميلاد');
+                    return;
+                }
+                
+                if (!isValidAge(birthDateValue)) {
+                    showError('عمرك يجب أن يكون 13 سنة على الأقل للتسجيل');
+                    return;
+                }
+                
+                if (!emailValue) {
+                    showError('الرجاء إدخال رقم الهاتف أو البريد الإلكتروني');
+                    return;
+                }
+                
+                const isEmail = emailValue.includes('@');
+                let isValid = false;
+                
+                if (isEmail) {
+                    isValid = isValidEmail(emailValue);
+                    if (!isValid) {
+                        showError('الرجاء إدخال بريد إلكتروني صحيح');
+                        return;
+                    }
+                } else {
+                    isValid = isValidPhone(emailValue);
+                    if (!isValid) {
+                        showError('الرجاء إدخال رقم هاتف صحيح ');
+                        return;
+                    }
+                }
+                
+                if (isUserExists(emailValue)) {
+                    showError('هذا البريد الإلكتروني أو رقم الهاتف مسجل مسبقاً');
+                    return;
+                }
+                
+                if (!passwordValue) {
+                    showError('الرجاء إدخال كلمة المرور');
+                    return;
+                }
+                
+                if (passwordValue.length < 8) {
+                    showError('كلمة المرور يجب أن تكون 8 أحرف على الأقل');
+                    return;
+                }
+                
+                if (!isStrongPassword(passwordValue)) {
+                    showError('كلمة المرور يجب أن تحتوي على حرف كبير (A-Z) ورقم (0-9) على الأقل');
+                    return;
+                }
+                
+                setLoading(true);
+               
+                const newUser = {
+                    email: isEmail ? emailValue : null,
+                    phone: !isEmail ? emailValue : null,  // أو phoneValue
+                    password: passwordValue,
+                    first_name: firstNameValue,
+                    last_name: lastNameValue,
+                    birth_date: birthDateValue,
+                    createdAt: new Date().toISOString(),
+                    reports: [],
+                    profileImage: 'imags/user.png'
+                };
+                
+                fetch("/api/accounts/register/", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify(newUser)
+                })
+                .then(async response => {
+                   const data = await response.json();
+
+                   if (response.ok) {
+                    // 🟢 نجاح في Django
+                     showSuccess("تم إنشاء الحساب في السيرفر!");
+
+                     localStorage.setItem("currentUser", JSON.stringify(newUser));
+
+                     setTimeout(() => {
+                        window.location.href = "home.html";
+                      }, 2000);
+
+                    } else {
+                           // ❌ خطأ من السيرفر
+                         showError(data.error || "خطأ في السيرفر");
+                    }
+                })
+                .catch(() => {
+                  // 🔴 لا يوجد إنترنت → LocalStorage
+                   showError("لا يوجد اتصال، تم الحفظ محلياً");
+
+                   saveUser(newUser);
+
+                   setTimeout(() => {
+                     window.location.href = "home.html";
+                  }, 2000);
+                });
+            });
+        }
+        
+        const allInputs = [lastName, firstName, birthDate, email, password];
+        
+        allInputs.forEach(input => {
+            if (input) {
+                input.addEventListener('input', function() {
+                    const errorMsg = document.querySelector('.error-message');
+                    if (errorMsg) {
+                        errorMsg.remove();
+                    }
+                });
+            }
+        });
+        
+        if (email) {
+            email.addEventListener('input', function() {
+                let value = this.value.replace(/[\s-]/g, '');
+                if (value.match(/^(05|06|07)[0-9]{0,8}$/)) {
+                    if (value.length >= 3) {
+                        value = value.slice(0, 3) + ' ' + value.slice(3);
+                    }
+                    if (value.length >= 7) {
+                        value = value.slice(0, 7) + ' ' + value.slice(7);
+                    }
+                    if (value.length >= 10) {
+                        value = value.slice(0, 10) + ' ' + value.slice(10);
+                    }
+                    this.value = value;
+                }
+            });
+        }
+        
+    });
+</script>
+</body>
+</html>

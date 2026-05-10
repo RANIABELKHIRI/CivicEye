@@ -1,0 +1,243 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>CivicEye - تسجيل الدخول</title>
+    <style>
+        body{
+            background-image: url("{% static 'accounts/images/1.png' %}");
+            background-size:100%100%;
+            background-repeat: no-repeat;
+            background-position: center;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+    </style> 
+</head>
+<body>
+<div class="overlay"> 
+    <div class="square">
+        <form id="loginForm">
+            <input type="text" class="input-field" placeholder="رقم الهاتف او البريد الالكتروني" dir="rtl" name="login_identifier">
+            <input type="password" class="input-field" placeholder="كلمة المرور" name="login_password">
+            <button type="submit" class="login-btn">تسجيل الدخول</button>
+            <div><a href="#" class="forget dynapuff">هل نسيت كلمة السر</a></div>
+            <button type="button" class="creat-btn" onclick="window.location.href='/api/accounts/register-page/'">انشاء حساب</button>
+        </form>
+    </div> 
+</div>
+<div class="text">
+  <img src="{% static 'accounts/images/Frame_1.svg' %}">
+</div>
+<div class="text2">
+    <p><span style="color: #6b6767;font-size: 30px">منصة تتيح لك التبليغ عن مشاكل بكل سهولة<br> 
+    صور, ارسل, وتابع حالة الابلاغ خطوة بخطوة<br> <span style="margin-right: 100px;">لنجعل مدينتنا افضل معا</span></span></p>
+</div>
+<div class="rectangle"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    const emailInput = document.querySelector('input[name="login_identifier"]');
+    const passwordInput = document.querySelector('input[name="login_password"]');
+    const submitButton = document.querySelector('.login-btn');
+
+    function showError(message) {
+        const oldError = document.querySelector('.error-message');
+        if (oldError) oldError.remove();
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.style.backgroundColor = '#ffebee';
+        errorDiv.style.padding = '10px';
+        errorDiv.style.borderRadius = '5px';
+        errorDiv.style.marginTop = '10px';
+        errorDiv.style.textAlign = 'center';
+        
+        const square = document.querySelector('.square');
+        if (square) {
+            square.appendChild(errorDiv);
+            errorDiv.textContent = message;
+        }
+    }
+
+    function showSuccess(message) {
+        const oldSuccess = document.querySelector('.success-message');
+        if (oldSuccess) oldSuccess.remove();
+        
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.style.color = 'green';
+        successDiv.style.backgroundColor = '#e8f5e8';
+        successDiv.style.padding = '10px';
+        successDiv.style.borderRadius = '5px';
+        successDiv.style.marginTop = '10px';
+        successDiv.style.textAlign = 'center';
+        
+        const square = document.querySelector('.square');
+        if (square) {
+            square.appendChild(successDiv);
+            successDiv.textContent = message;
+            
+            setTimeout(function() {
+                if (successDiv && successDiv.parentNode) {
+                    successDiv.remove();
+                }
+            }, 3000);
+        }
+    }
+
+    function setLoading(isLoading) {
+        if (!submitButton) return;
+        
+        if (isLoading) {
+            submitButton.disabled = true;
+            submitButton.style.opacity = '0.7';
+            submitButton.textContent = 'جاري تسجيل الدخول...';
+        } else {
+            submitButton.disabled = false;
+            submitButton.style.opacity = '1';
+            submitButton.textContent = 'تسجيل الدخول';
+        }
+    }
+
+    function isStrongPassword(password) {
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
+        return passwordRegex.test(password);
+    }
+
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    function isValidPhone(phone) {
+        const phoneRegex = /^(05|06|07)[0-9]{8}$/;
+        return phoneRegex.test(phone);
+    }
+
+    function findUser(identifier, password) {
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        return users.find(user => {
+            const normalizedIdentifier = identifier.replace(/\s/g, '');
+            const normalizedUserIdentifier = user.identifier.replace(/\s/g, '');
+            return normalizedUserIdentifier === normalizedIdentifier && user.password === password;
+        });
+    }
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const identifierValue = emailInput ? emailInput.value.trim() : '';
+            const passwordValue = passwordInput ? passwordInput.value : '';
+            
+            const oldError = document.querySelector('.error-message');
+            if (oldError) oldError.remove();
+            
+            const oldSuccess = document.querySelector('.success-message');
+            if (oldSuccess) oldSuccess.remove();
+            
+            if (!identifierValue) {
+                showError('الرجاء إدخال رقم الهاتف أو البريد الإلكتروني');
+                return;
+            }
+            
+            if (!passwordValue) {
+                showError('الرجاء إدخال كلمة المرور');
+                return;
+            }
+            
+            const isEmail = identifierValue.includes('@');
+            let isValidIdentifier = false;
+            
+            if (isEmail) {
+                isValidIdentifier = isValidEmail(identifierValue);
+                if (!isValidIdentifier) {
+                    showError('الرجاء إدخال بريد إلكتروني صحيح');
+                    return;
+                }
+            } else {
+                const phoneWithoutSpaces = identifierValue.replace(/\s/g, '');
+                isValidIdentifier = isValidPhone(phoneWithoutSpaces);
+                if (!isValidIdentifier) {
+                    showError('الرجاء إدخال رقم هاتف صحيح (مثال: 05xxxxxxxx أو 06xxxxxxxx أو 07xxxxxxxx)');
+                    return;
+                }
+            }
+            
+           
+            setLoading(true);
+
+            fetch("http://127.0.0.1:8000/api/accounts/login/", {
+               method: "POST",
+               headers: {
+             "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+               identifier: identifierValue,
+               password: passwordValue
+               })
+            })
+              .then(response => response.json())
+              .then(data => {
+              if (data.access) {
+                  localStorage.setItem("access", data.access);
+                  localStorage.setItem("refresh", data.refresh);
+
+                  showSuccess('تم تسجيل الدخول بنجاح (Online)');
+        
+                  // 🔥 هنا التوجيه حسب role من Django
+                  setTimeout(() => {
+                    window.location.href = data.redirect_url;
+                    
+                }, 1000);
+
+              } else {
+                showError('خطأ في بيانات الدخول');
+                setLoading(false);
+              }
+            })
+         .catch(error => {
+           const offlineUser = JSON.parse(localStorage.getItem("offlineUser"));
+
+           if (offlineUser && offlineUser.username === identifierValue) {
+            showSuccess('تم الدخول بدون إنترنت (Offline)');
+        
+             setTimeout(() => {
+               window.location.href = 'home.html';
+            }, 1000);
+           } else {
+             showError('لا يوجد اتصال ولا بيانات محفوظة');
+             setLoading(false);
+            }
+         });
+        });
+    }
+    
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const errorMsg = document.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.remove();
+            }
+        });
+    }
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const errorMsg = document.querySelector('.error-message');
+            if (errorMsg && errorMsg.textContent.includes('كلمة المرور')) {
+                errorMsg.remove();
+            }
+        });
+    }
+});
+</script>
+</body>
+</html>

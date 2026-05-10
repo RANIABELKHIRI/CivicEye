@@ -1,0 +1,684 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>CivicEye - لوحة المتابعة</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body{
+            margin: 0;
+            background-color: #020030;
+             font-family: system-ui, 'Segoe UI', Tahoma, Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            background-color: rgb(0, 27, 50);
+            padding: 10px;
+        }
+        .logo1{
+            direction:ltr;
+            width: 140px;
+        }
+        .profileImage{
+            direction:ltr;
+            margin-right: 100px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;    
+            border: 2px solid #38bdf8;
+            object-fit: cover;      
+            cursor: pointer;
+        }
+        .profileImage:hover {
+            transform: scale(1.02);
+            border-color: #98dfff;
+        }
+        .part-1{
+            background-color: rgb(2, 39, 71);
+            width: 220px;
+            min-height: 100vh;
+            height: 100%;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            align-self: flex-start;
+        }
+        .part-1 a {
+            display: block;
+            padding: 20px;
+            color: #cbd5f5;
+            text-decoration: none;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .part-1 a:hover {
+            background: #334155; 
+            width: 180px;        
+        }
+        .wrapper {
+            display: flex;
+            align-items: flex-start;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px 30px;
+            background-color: #020030;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .cards {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        .card {
+            width: 180px;
+            background: #1e293b;
+            margin-top: 10px;
+            padding: 16px 8px;
+            text-align: center;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            color: #ffffff;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .card h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #cbd5f5;
+        }
+        /* تنسيق خاص للبطاقة التي تحتوي على الدائرة النسبية */
+        .circular-progress-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .progress-ring-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 5px auto 8px auto;
+        }
+        .progress-ring-circle-bg {
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .percentage-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #38bdf8;
+            direction: ltr;
+        }
+        .card p {
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+        /* باقي البطاقات تحافظ على التنسيق القديم للنص */
+        .card:not(.circular-progress-card) p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #38bdf8;
+        }
+        .charts-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .map2 {
+            background: #1e293b;
+            width: 100%;
+            margin-bottom: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            flex-direction: column;
+            padding: 20px 15px;
+        }
+        .map2:last-child {
+            background: #0f172a;
+            font-family: system-ui;
+            color: #cbd5e6;
+            font-size: 16px;
+            text-align: center;
+            line-height: 1.5;
+            flex-direction: column;
+            justify-content: center;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 350px;
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 8px;
+            width: 100%;
+            height: auto;
+        }
+        .chart-title {
+            color: #e2e8f0;
+            font-size: 18px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            background: #02061780;
+            padding: 6px 20px;
+            border-radius: 40px;
+            backdrop-filter: blur(4px);
+            display: inline-block;
+        }
+        @media (max-width: 780px) {
+            .part-1 { width: 80px; }
+            .part-1 a { font-size: 12px; padding: 12px; width: auto; }
+            .part-1 a:hover { width: 100%; }
+            .main-content { padding: 15px; }
+            .cards { gap: 16px; }
+            .card { width: 145px; }
+            .progress-ring-container { width: 80px; height: 80px; }
+            .percentage-text { font-size: 1.2rem; }
+            .card:not(.circular-progress-card) p { font-size: 1.4rem; }
+            .map2 { padding: 15px; }
+        }
+        @media (max-width: 560px) {
+            .cards { gap: 12px; }
+            .card { width: 130px; }
+            .card h3 { font-size: 0.8rem; }
+            .progress-ring-container { width: 70px; height: 70px; }
+            .percentage-text { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+   <div class="container">
+    <img id="profileImage" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338bdf8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" 
+     alt="صورة المستخدم" class="profileImage">
+    <img src="{% static 'accounts/images/Frame_1.svg' %}" alt="CivicEye" class="logo1" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 60%22%3E%3Ctext x=%2210%22 y=%2240%22 fill=%22%2338bdf8%22 font-size=%2224%22%3ECivicEye%3C/text%3E%3C/svg%3E';">
+  </div>
+  <div class="wrapper">
+      <div class="part-1">
+          <a href="{% url 'admin-dashboard' %}">لوحة المتابعة</a>
+          <a href="{% url 'authorities' %}">الجهات المعنية</a> 
+          <a href="{% url 'heatmap-page' %}">الخريطة</a> 
+      </div>  
+      
+      <div class="main-content">
+          <div class="cards">
+              <div class="card">
+                  <h3>إجمالي عدد البلاغات</h3>
+                  <p id="totalReports">{{ stats.total }}</p>
+              </div>
+              <!-- بطاقة "البلاغات المعالجة" مع دائرة نسبية -->
+              <div class="card circular-progress-card">
+                  <h3>البلاغات المعالجة</h3>
+                  <div class="progress-ring-container">
+                      <svg width="100" height="100" viewBox="0 0 100 100" style="width:100%; height:100%;">
+                          <circle class="progress-ring-circle-bg" cx="50" cy="50" r="42" fill="none" stroke="#334155" stroke-width="8"/>
+                          <circle id="processedCircle" class="progress-ring-circle" cx="50" cy="50" r="42" fill="none" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" stroke-dasharray="263.89" stroke-dashoffset="263.89"/>
+                      </svg>
+                      <div class="percentage-text" id="processedPercentText">0%</div>
+                  </div>
+                  <p style="font-size:0.85rem; color:#94a3b8;">من إجمالي البلاغات</p>
+              </div>
+              <div class="card">
+                  <h3>نسبة الإنجاز</h3>
+                  <p id="completionPercent">{{ stats.completion_percent }}%</p>
+              </div>
+              <div class="card">
+                  <h3>نسبة البلاغات المرفوضة</h3>
+                  <p id="rejectedPercent">{{ stats.rejected_percent }}%</p>
+              </div>
+          </div>
+          
+          <div class="charts-wrapper">
+              <div class="map2" id="barChartContainer">
+                  <div class="chart-title"> أنواع البلاغات المرسلة اسبوعيا</div>
+                  <canvas id="weeklyReportChart" width="600" height="300" style="max-width:100%; height:auto; background: #0f172a;"></canvas>
+              </div>
+              
+              <div class="map2" id="lineChartContainer">
+                  <div class="chart-title"> حالات البلاغ أسبوعياً</div>
+                  <canvas id="weeklyStatusChart" width="650" height="320" style="max-width:100%; height:auto; background: #0f172a;"></canvas>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <script>
+    const STORAGE_KEY = "civiceye_reports";
+    
+    const STATUS_KEYS = {
+        road: "roads_reports_status",
+        lighting: "electricity_reports_status",
+        garbage: "hygiene_reports_status"
+    };
+    
+    function loadStatusMap(authorityType) {
+        const key = STATUS_KEYS[authorityType];
+        if (!key) return {};
+        try {
+            const stored = localStorage.getItem(key);
+            if (stored) return JSON.parse(stored);
+        } catch(e) {}
+        return {};
+    }
+    
+    function getRealReports() {
+        try {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const reports = JSON.parse(stored);
+                return reports.map(report => {
+                    const authorityType = report.problemType;
+                    if (authorityType) {
+                        const statusMap = loadStatusMap(authorityType);
+                        const reportId = report.reportId || `rep_${report.timestamp}_${Math.random()}`;
+                        const savedStatus = statusMap[reportId];
+                        if (savedStatus) {
+                            return { ...report, status: savedStatus };
+                        }
+                    }
+                    return report;
+                });
+            }
+        } catch(e) {}
+        return [];
+    }
+    
+    // تحديث البطاقات بما فيها الدائرة النسبية
+    function updateStatsCards() {
+        const reports = getRealReports();
+        const total = reports.length;
+       
+        
+        if (total === 0) {
+            // تحديث النص والدائرة للبلاغات المعالجة
+            const processedPercentVal = 0;
+            document.getElementById('processedPercentText').innerText = '0%';
+            updateProgressCircle(processedPercentVal);
+            
+            document.getElementById('completionPercent').innerText = '0%';
+            document.getElementById('rejectedPercent').innerText = '0%';
+            return;
+        }
+        
+        const completedCount = reports.filter(r => {
+            const status = r.status || '';
+            return status === 'resolved';
+        }).length;
+        
+        const inProgressCount = reports.filter(r => {
+            const status = r.status || '';
+            return status === 'in_progress';
+        }).length;
+        
+        const rejectedCount = reports.filter(r => {
+            const status = r.status || '';
+            return status === 'rejected';
+        }).length;
+        
+        // نسبة البلاغات المعالجة (تم الحل)
+        const processedPercentVal = Math.round((completedCount / total) * 100);
+        // نسبة الإنجاز (معالجة + نصف قيد المعالجة)
+        const completionPercentVal = Math.round(((completedCount + (inProgressCount * 0.5)) / total) * 100);
+        // نسبة البلاغات المرفوضة
+        const rejectedPercentVal = Math.round((rejectedCount / total) * 100);
+        
+        // تحديث الدائرة النسبية والنص الخاص بالبلاغات المعالجة
+        document.getElementById('processedPercentText').innerText = processedPercentVal + '%';
+        updateProgressCircle(processedPercentVal);
+        
+        document.getElementById('completionPercent').innerText = completionPercentVal + '%';
+        document.getElementById('rejectedPercent').innerText = rejectedPercentVal + '%';
+    }
+    
+    // دالة لتحديث الدائرة بناءً على النسبة المئوية
+    function updateProgressCircle(percent) {
+        const circle = document.getElementById('processedCircle');
+        if (!circle) return;
+        const radius = 42;
+        const circumference = 2 * Math.PI * radius; // 263.89
+        
+        // حساب offset بناءً على النسبة (كلما زادت النسبة قل الـ offset)
+        const offset = circumference - (percent / 100) * circumference;
+        circle.style.strokeDasharray = circumference;
+        circle.style.strokeDashoffset = offset;
+        
+        // تغيير لون الدائرة حسب النسبة (اختياري لكن يحافظ على التصميم)
+        if (percent >= 70) {
+            circle.setAttribute('stroke', '#4ade80'); // أخضر فاتح للإنجاز العالي
+        } else if (percent >= 40) {
+            circle.setAttribute('stroke', '#38bdf8'); // أزرق
+        } else {
+            circle.setAttribute('stroke', '#facc15'); // أصفر للقليل
+        }
+    }
+    
+    function getRealCategoryCounts() {
+        const reports = getRealReports();
+        let wasteCount = 0, roadCount = 0, lightCount = 0;
+        
+        reports.forEach(report => {
+            const problemType = (report.problemType || '').toLowerCase();
+            if (problemType === 'garbage') wasteCount++;
+            else if (problemType === 'road') roadCount++;
+            else if (problemType === 'lighting') lightCount++;
+        });
+        
+        return [wasteCount, roadCount, lightCount];
+    }
+    
+    function getRealWeeklyStatusData() {
+        const reports = getRealReports();
+        const studyingByDay = new Array(7).fill(0);
+        const inProgressByDay = new Array(7).fill(0);
+        const completedByDay = new Array(7).fill(0);
+        const rejectedByDay = new Array(7).fill(0);
+        
+        reports.forEach(report => {
+            let rawDate = report.timestamp;
+            let dayIndex = -1;
+            
+            if (rawDate) {
+                const dateObj = new Date(rawDate);
+                if (!isNaN(dateObj.getTime())) {
+                    dayIndex = dateObj.getDay();
+                }
+            }
+            
+            if (dayIndex === -1) return;
+            
+            const status = report.status || '';
+            
+            if (status === 'resolved') {
+                completedByDay[dayIndex]++;
+            } 
+            else if (status === 'in_progress') {
+                inProgressByDay[dayIndex]++;
+            }
+            else if (status === 'rejected') {
+                rejectedByDay[dayIndex]++;
+            }
+            else {
+                studyingByDay[dayIndex]++;
+            }
+        });
+        
+        return { studying: studyingByDay, inProgress: inProgressByDay, completed: completedByDay, rejected: rejectedByDay };
+    }
+    
+    let currentBarChart = null;
+    
+    function renderBarChart() {
+        const canvas = document.getElementById('weeklyReportChart');
+        if (!canvas) return;
+        
+        const [waste, road, light] = getRealCategoryCounts();
+        const categories = ['نفايات', 'طرقات', 'إنارة'];
+        const counts = [waste, road, light];
+        
+        if (currentBarChart) {
+            currentBarChart.destroy();
+        }
+        
+        const ctx = canvas.getContext('2d');
+        currentBarChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categories,
+                datasets: [{
+                    label: 'عدد البلاغات',
+                    data: counts,
+                    backgroundColor: ['#3b82f6', '#f97316', '#facc15'],
+                    borderColor: '#ffffff30',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    barPercentage: 0.65
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#0f172a', titleColor: '#f1f5f9', bodyColor: '#cbd5e1' }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'عدد البلاغات', color: '#94a3b8' },
+                        ticks: { 
+                            stepSize: 5,
+                            precision: 0,
+                            color: '#cbd5e6'
+                        },
+                        grid: { color: '#334155' }
+                    },
+                    x: {
+                        title: { display: true, text: 'نوع البلاغ', color: '#94a3b8' },
+                        ticks: { color: '#f1f5f9', font: { weight: 'bold' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+    
+    let currentLineChart = null;
+    
+    function renderLineChart() {
+        const canvas = document.getElementById('weeklyStatusChart');
+        if (!canvas) return;
+        
+        const { studying, inProgress, completed, rejected } = getRealWeeklyStatusData();
+        const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        
+        if (currentLineChart) {
+            currentLineChart.destroy();
+        }
+        
+        const ctx = canvas.getContext('2d');
+        currentLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: days,
+                datasets: [
+                    {
+                        label: 'قيد الدراسة',
+                        data: studying,
+                        borderColor: '#facc15',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        pointBackgroundColor: '#facc15',
+                        pointBorderColor: '#1e293b',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 3,
+                        fill: false
+                    },
+                    {
+                        label: 'قيد المعالجة',
+                        data: inProgress,
+                        borderColor: '#38bdf8',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        pointBackgroundColor: '#38bdf8',
+                        pointBorderColor: '#0f172a',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 3,
+                        fill: false
+                    },
+                    {
+                        label: 'تم الحل',
+                        data: completed,
+                        borderColor: '#4ade80',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        pointBackgroundColor: '#4ade80',
+                        pointBorderColor: '#0f172a',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 3,
+                        fill: false
+                    },
+                    {
+                        label: 'مرفوض',
+                        data: rejected,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'transparent',
+                        tension: 0.3,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#0f172a',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        borderWidth: 3,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { 
+                        position: 'top', 
+                        labels: { 
+                            color: '#e2e8f0', 
+                            font: { size: 12, weight: 'bold' },
+                            usePointStyle: true,
+                            boxWidth: 12
+                        } 
+                    },
+                    tooltip: { 
+                        mode: 'index', 
+                        intersect: false,
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#cbd5e1',
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.raw + ' بلاغ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'عدد البلاغات', color: '#94a3b8' },
+                        ticks: { 
+                            stepSize: 5,
+                            precision: 0,
+                            color: '#cbd5e6'
+                        },
+                        grid: { color: '#334155' }
+                    },
+                    x: {
+                        title: { display: true, text: 'أيام الأسبوع', color: '#94a3b8' },
+                        ticks: { color: '#e2e8f0', font: { size: 11 } },
+                        grid: { display: false }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+    
+    function refreshAllDashboard() {
+        renderBarChart();
+        renderLineChart();
+    }
+    
+    function listenForStorageUpdates() {
+        window.addEventListener('storage', (e) => {
+            if (e.key === STORAGE_KEY || 
+                e.key === STATUS_KEYS.road || 
+                e.key === STATUS_KEYS.light || 
+                e.key === STATUS_KEYS.trash) {
+                refreshAllDashboard();
+            }
+        });
+    }
+    
+    let lastDataHash = '';
+    
+    function getReportsHash() {
+        const reports = getRealReports();
+        return reports.length + '|' + reports.map(r => r.status + (r.timestamp || '') + (r.problemType || '')).join('');
+    }
+    
+    function periodicSync() {
+        setInterval(function() {
+            const currentHash = getReportsHash();
+            if (currentHash !== lastDataHash) {
+                lastDataHash = currentHash;
+                refreshAllDashboard();
+            }
+        }, 2000);
+    }
+    
+    function overrideLocalStorageSetItem() {
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            originalSetItem.apply(this, arguments);
+            if (key === STORAGE_KEY || key === STATUS_KEYS.road || key === STATUS_KEYS.light || key === STATUS_KEYS.trash) {
+                refreshAllDashboard();
+            }
+        };
+    }
+    
+    window.addEventListener('DOMContentLoaded', function() {
+        // إعداد الدائرة مبدئياً
+        const circumference = 2 * Math.PI * 42;
+        const circle = document.getElementById('processedCircle');
+        if (circle) {
+            circle.style.strokeDasharray = circumference;
+            circle.style.strokeDashoffset = circumference;
+        }
+        refreshAllDashboard();
+        listenForStorageUpdates();
+        periodicSync();
+        overrideLocalStorageSetItem();
+        lastDataHash = getReportsHash();
+    });
+  </script>
+</body>
+</html>
