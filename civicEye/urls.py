@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from accounts.views import login_view
+from django.http import HttpResponse
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -31,6 +32,7 @@ urlpatterns = [
     path('api/refresh/', TokenRefreshView.as_view(), name='refresh'), 
     
     path('api/accounts/', include('accounts.urls')),
-    path('', login_view, name='login'),
+    #path('', login_view, name='login'),
     path('core/', include('core.urls')),
+    path('', lambda request: HttpResponse("Server is working"), name='home'),
 ]
