@@ -16,7 +16,7 @@ urlpatterns = [
     path('dashboard/', views.admin_dashboard, name='admin-dashboard'),
     path('api/dashboard/stats/', views.DashboardStatsAPIView.as_view(), name='dashboard-stats'),
     
-    path('add/', views.add_complaint_view),
+    
     # API لإرسال الشكاوى
     path('api/create/', views.ComplaintCreateAPIView.as_view(), name='create-complaint'),
 
