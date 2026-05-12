@@ -34,5 +34,6 @@ urlpatterns = [
     path('api/accounts/', include('accounts.urls')),
     path('', login_page, name='login'),
     path('core/', include('core.urls')),
+    path('complaints/', include('complaints.urls')),
     
 ]
