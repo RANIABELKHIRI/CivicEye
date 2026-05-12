@@ -4,10 +4,9 @@ from complaints.models import Complaint
 def index(request):
     return render(request, 'index.html')
 
-#def citizen_home(request):
-    return render(request, 'citizen/home.html')
 def citizen_home(request):
-    raise Exception("CITIZEN HOME IS CALLED - CHECK TEMPLATE ERROR")
+    return render(request, 'citizen/home.html')
+
 
 def service1_home(request):
 
