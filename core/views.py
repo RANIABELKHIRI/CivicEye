@@ -1,11 +1,14 @@
 from django.shortcuts import render
 from complaints.models import Complaint
-
+from django.http import HttpResponse
 def index(request):
     return render(request, 'index.html')
 
-def citizen_home(request):
+#def citizen_home(request):
     return render(request, 'citizen/home.html')
+
+def citizen_home(request):
+    return HttpResponse("Citizen OK")
 
 def service1_home(request):
 
