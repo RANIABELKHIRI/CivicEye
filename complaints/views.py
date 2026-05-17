@@ -64,8 +64,8 @@ class ComplaintCreateAPIView(APIView):
 def add_complaint_view(request):
     return render(request, 'complaints/add_complaint.html')
 
-@login_required
-def track_complaints_view(request):
+#@login_required
+#def track_complaints_view(request):
 
     # جلب بلاغات المستخدم الحالي
     complaints = Complaint.objects.filter(
@@ -75,6 +75,8 @@ def track_complaints_view(request):
     return render(request, 'complaints/track.html', {
         'complaints': complaints
     })
+def track_complaints_view(request):
+    return render(request, 'complaints/track.html')
 
 class MyComplaintsAPIView(APIView):
     permission_classes = [IsAuthenticated]
