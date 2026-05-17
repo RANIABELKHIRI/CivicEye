@@ -135,3 +135,4 @@ STATICFILES_DIRS = [
 AUTH_USER_MODEL = 'accounts.CustomUser'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 CORS_ALLOW_ALL_ORIGINS = True
+LOGIN_URL = '/'
