@@ -5,7 +5,7 @@ from .views import heatmap_page, HeatmapDataAPIView
 urlpatterns = [
     # صفحة إرسال الشكوى (HTML)
     path('', views.add_complaint_view, name='add-complaint-page'),
-    path('track/', views.track_complaints_view, name='track-complaints'),
+    path('complaints/track/', views.track_complaints_view, name='track-complaints'),
     path('api/complaints/my/', views.MyComplaintsAPIView.as_view(), name='my-complaints'),
     
     #الخريطة
