@@ -64,7 +64,7 @@ class ComplaintCreateAPIView(APIView):
 def add_complaint_view(request):
     return render(request, 'complaints/add_complaint.html')
 
-@login_required
+#@login_required
 def track_complaints_view(request):
 
     # جلب بلاغات المستخدم الحالي
